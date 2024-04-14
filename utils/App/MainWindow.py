@@ -52,11 +52,15 @@ class MainWindow(QMainWindow):
         print("Run Button Clicked!")
         self.runButton.setEnabled(False)
         self.stopButton.setEnabled(True)
+        self.modelComboBox.setEnabled(False)
+        self.interfaceComboBox.setEnabled(False)
 
     def stopButton_was_clicked(self):
         print("Stop Button Clicked")
         self.stopButton.setEnabled(False)
         self.runButton.setEnabled(True)
+        self.modelComboBox.setEnabled(True)
+        self.interfaceComboBox.setEnabled(True)
 
     def write(self, text):
         self.output_text.insertPlainText(text)
