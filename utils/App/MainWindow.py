@@ -67,7 +67,6 @@ class MainWindow(QMainWindow):
         print("Run Button Clicked!")
         self.runButton.setEnabled(False)
         self.stopButton.setEnabled(True)
-        self.saveLogsButton.setEnabled(True)
         self.modelComboBox.setEnabled(False)
         print("Model Selection is disabled")
         self.interfaceComboBox.setEnabled(False)
@@ -75,6 +74,7 @@ class MainWindow(QMainWindow):
 
     def stopButton_was_clicked(self):
         print("Stop Button Clicked")
+        self.saveLogsButton.setEnabled(True)
         self.stopButton.setEnabled(False)
         self.runButton.setEnabled(True)
         self.modelComboBox.setEnabled(True)
@@ -87,6 +87,7 @@ class MainWindow(QMainWindow):
         text = self.output_text.toPlainText()
         with open(f"output/log_{self.last_startTime}.txt", "w") as f:
             f.write(text)
+        self.output_text.clear()
     
     def get_last_startTime(self):
         return self.last_startTime
