@@ -14,7 +14,6 @@ def test_press_save_on_init(qtbot):
     
     assert widget.saveLogsButton.isEnabled() == False
 
-
 def test_press_save(qtbot):
     widget = App.MainWindow.MainWindow()
 
