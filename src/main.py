@@ -14,13 +14,14 @@ from PyQt6.QtWidgets import QApplication
 
 def main():
     print("hello world")
-
+    
     app = QApplication(sys.argv)
 
     window = App.MainWindow.MainWindow()
     window.show()
 
     app.exec()
+
     
 
 

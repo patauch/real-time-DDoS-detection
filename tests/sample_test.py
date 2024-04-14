@@ -1,2 +1,2 @@
 def test_smth():
-    return True
+    assert 1 == 1
