@@ -51,6 +51,21 @@ def test_clear_logs_after_save(qtbot):
 
     assert widget.output_text.toPlainText() == ''
 
+def test_saveButton_state_after_click(qtbot):
+    widget = App.MainWindow.MainWindow()
+
+    qtbot.addWidget(widget)
+
+    qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+
+    start_time = widget.get_last_startTime()
+
+    qtbot.mouseClick(widget.saveLogsButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+
+    assert widget.saveLogsButton.isEnabled() == False
+
+
 def test_toggle_saveButton_after_init(qtbot):
     widget = App.MainWindow.MainWindow()
 

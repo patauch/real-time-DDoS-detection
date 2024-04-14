@@ -88,6 +88,7 @@ class MainWindow(QMainWindow):
         with open(f"output/log_{self.last_startTime}.txt", "w") as f:
             f.write(text)
         self.output_text.clear()
+        self.saveLogsButton.setEnabled(False)
     
     def get_last_startTime(self):
         return self.last_startTime
