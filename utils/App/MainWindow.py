@@ -12,6 +12,10 @@ class MainWindow(QMainWindow):
 
         self.runButton = QPushButton("Run Detection")
         self.runButton.clicked.connect(self.runButton_was_clicked)
+        self.runButton_is_checked = True
+        
+        self.stopButton = QPushButton("Stop")
+        self.stopButton.clicked.connect(self.stopButton_was_clicked)
 
         self.modelComboBox = QComboBox()
 
@@ -23,9 +27,12 @@ class MainWindow(QMainWindow):
         self.headerLayout.addWidget(self.runButton)
         self.headerLayout.addWidget(self.modelComboBox)
         self.headerLayout.addWidget(self.interfaceComboBox)
+        self.headerLayout.addWidget(self.stopButton)
 
+        self.loggerLayout = QHBoxLayout()
 
         self.mainLayout.addLayout(self.headerLayout)
+        self.mainLayout.addLayout(self.loggerLayout)
 
         self.container = QWidget()
         self.container.setLayout(self.mainLayout)
@@ -34,3 +41,6 @@ class MainWindow(QMainWindow):
 
     def runButton_was_clicked(self):
         print("Run Button Clicked!")
+
+    def stopButton_was_clicked(self):
+        print("Stop Button Clicked")
