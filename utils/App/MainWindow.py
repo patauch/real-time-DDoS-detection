@@ -14,9 +14,9 @@ class MainWindow(QMainWindow):
 
         self.runButton = QPushButton("Run Detection")
         self.runButton.clicked.connect(self.runButton_was_clicked)
-        self.runButton_is_checked = True
         
         self.stopButton = QPushButton("Stop")
+        self.runButton.setCheckable(True)
         self.stopButton.clicked.connect(self.stopButton_was_clicked)
 
         self.modelComboBox = QComboBox()
@@ -50,9 +50,13 @@ class MainWindow(QMainWindow):
 
     def runButton_was_clicked(self):
         print("Run Button Clicked!")
+        self.runButton.setEnabled(False)
+        self.stopButton.setEnabled(True)
 
     def stopButton_was_clicked(self):
         print("Stop Button Clicked")
+        self.stopButton.setEnabled(False)
+        self.runButton.setEnabled(True)
 
     def write(self, text):
         self.output_text.insertPlainText(text)
