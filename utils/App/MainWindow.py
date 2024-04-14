@@ -53,7 +53,9 @@ class MainWindow(QMainWindow):
         self.runButton.setEnabled(False)
         self.stopButton.setEnabled(True)
         self.modelComboBox.setEnabled(False)
+        print("Model Selection is disabled")
         self.interfaceComboBox.setEnabled(False)
+        print("Interface Selection is disabled")
 
     def stopButton_was_clicked(self):
         print("Stop Button Clicked")
