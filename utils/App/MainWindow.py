@@ -2,8 +2,10 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QMainWindow, QPushButton,
     QWidget, QLabel,
-    QLineEdit, QVBoxLayout,
+    QLineEdit, QTextEdit, QVBoxLayout,
     QHBoxLayout, QComboBox)
+import sys
+from .StdoutRedirector import OutputRedirector
 
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
@@ -21,6 +23,11 @@ class MainWindow(QMainWindow):
 
         self.interfaceComboBox = QComboBox()
 
+        self.output_text = QTextEdit()
+        self.output_text.setReadOnly(True)
+        #Redirect standart output to the App
+        sys.stdout = OutputRedirector(self.output_text)
+
         self.mainLayout = QVBoxLayout()
 
         self.headerLayout = QHBoxLayout()
@@ -30,6 +37,8 @@ class MainWindow(QMainWindow):
         self.headerLayout.addWidget(self.stopButton)
 
         self.loggerLayout = QHBoxLayout()
+        self.loggerLayout.addWidget(self.output_text)
+
 
         self.mainLayout.addLayout(self.headerLayout)
         self.mainLayout.addLayout(self.loggerLayout)
@@ -44,3 +53,6 @@ class MainWindow(QMainWindow):
 
     def stopButton_was_clicked(self):
         print("Stop Button Clicked")
+
+    def write(self, text):
+        self.output_text.insertPlainText(text)
