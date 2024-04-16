@@ -1,18 +1,20 @@
 from PyQt6.QtCore import Qt, QThreadPool
 from PyQt6.QtWidgets import (
     QMainWindow, QPushButton,
-    QWidget, QLabel,
-    QLineEdit, QTextEdit, QVBoxLayout,
-    QHBoxLayout, QComboBox)
-import sys
+    QWidget, QTextEdit,
+    QVBoxLayout, QHBoxLayout,
+    QComboBox)
+import sys, traceback
 from .StdoutRedirector import OutputRedirector
 from .ThreadWorker import Worker
-import os
 from datetime import datetime
+
 
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
+
+        
 
         self.last_startTime = None
 
@@ -31,8 +33,13 @@ class MainWindow(QMainWindow):
 
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
+
+        
         #Redirect standart output to the App
-        sys.stdout = OutputRedirector(self.output_text)
+        self.old_stderr = sys.stderr
+        self.old_stdout = sys.stdout
+        sys.stderr = OutputRedirector(self.output_text, sys.stderr)
+        sys.stdout = OutputRedirector(self.output_text, sys.stdout)
 
         self.saveLogsButton = QPushButton("Save Logs")
         self.saveLogsButton.setEnabled(False)
@@ -65,18 +72,44 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.container)
 
     def runButton_was_clicked(self):
-        self.last_startTime = datetime.now().strftime("[%y.%m.%d;%H-%M-%S]")
-        print("Run Button Clicked!")
-        self.runButton.setEnabled(False)
-        self.stopButton.setEnabled(True)
-        self.modelComboBox.setEnabled(False)
-        print("Model Selection is disabled")
-        self.interfaceComboBox.setEnabled(False)
-        print("Interface Selection is disabled")
-        self.run_thread()
+        try:
+            self.last_startTime = datetime.now().strftime("[%y.%m.%d;%H-%M-%S]")
+
+            print("Run Button Clicked!")
+            
+            self.runButton.setEnabled(False)
+            self.stopButton.setEnabled(True)
+
+            self.modelComboBox.setEnabled(False)
+            print("Model Selection is disabled")
+
+            self.interfaceComboBox.setEnabled(False)
+            print("Interface Selection is disabled")
+
+            self.run_thread()
+        except:
+            sys.stderr = self.old_stderr
+            sys.stdout = self.old_stdout
+            traceback.print_exc()
 
     def stopButton_was_clicked(self):
         print("Stop Button Clicked")
+        self.worker.stop()
+
+
+    def run_thread(self):
+        self.worker = Worker()
+        self.worker.signals.finished.connect(self.thread_complete)
+
+        self.worker.signals.error.connect(self.error_recieved)
+
+        self.worker.signals.prints.connect(self.print_message)
+
+        self.threadpool.start(self.worker)
+
+    def thread_complete(self):
+        print("Run finished!")
+
         self.saveLogsButton.setEnabled(True)
         self.stopButton.setEnabled(False)
         self.runButton.setEnabled(True)
@@ -84,19 +117,22 @@ class MainWindow(QMainWindow):
         self.interfaceComboBox.setEnabled(True)
         self.worker.stop()
 
-    def run_thread(self):
-        self.worker = Worker()
-        self.threadpool.start(self.worker)
-
-    def write(self, text):
-        self.output_text.insertPlainText(text)
-
     def saveLogsButton_was_clicked(self):
         text = self.output_text.toPlainText()
         with open(f"output/log_{self.last_startTime}.txt", "w") as f:
             f.write(text)
         self.output_text.clear()
         self.saveLogsButton.setEnabled(False)
+
+    def error_recieved(self, *args):
+        try:
+            for arg in args:
+                print(arg)
+        except:
+            traceback.print_exc()
     
     def get_last_startTime(self):
         return self.last_startTime
+    
+    def print_message(self, text):
+        print(text)

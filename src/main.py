@@ -1,4 +1,4 @@
-import sys
+import sys, traceback
 import os
 # Get the current directory of the script
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import QApplication
 
 def main():
     print("hello world")
-    
+
     app = QApplication(sys.argv)
 
     window = App.MainWindow.MainWindow()
