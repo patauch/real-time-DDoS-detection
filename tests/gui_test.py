@@ -59,3 +59,4 @@ def test_toggle_modelSelect_after_stop(qtbot):
     qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
     
     assert (widget.modelComboBox.isEnabled() == True)
+
