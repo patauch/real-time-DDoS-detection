@@ -82,6 +82,7 @@ class MainWindow(QMainWindow):
         self.runButton.setEnabled(True)
         self.modelComboBox.setEnabled(True)
         self.interfaceComboBox.setEnabled(True)
+        self.worker.stop()
 
     def run_thread(self):
         self.worker = Worker()
