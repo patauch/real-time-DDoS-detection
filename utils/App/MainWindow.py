@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QThreadPool
 from PyQt6.QtWidgets import (
     QMainWindow, QPushButton,
     QWidget, QLabel,
@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout, QComboBox)
 import sys
 from .StdoutRedirector import OutputRedirector
+from .ThreadWorker import Worker
 import os
 from datetime import datetime
 
@@ -37,6 +38,7 @@ class MainWindow(QMainWindow):
         self.saveLogsButton.setEnabled(False)
         self.saveLogsButton.clicked.connect(self.saveLogsButton_was_clicked)
 
+        self.threadpool = QThreadPool()
 
         self.mainLayout = QVBoxLayout()
 
@@ -71,6 +73,7 @@ class MainWindow(QMainWindow):
         print("Model Selection is disabled")
         self.interfaceComboBox.setEnabled(False)
         print("Interface Selection is disabled")
+        self.run_thread()
 
     def stopButton_was_clicked(self):
         print("Stop Button Clicked")
@@ -79,6 +82,10 @@ class MainWindow(QMainWindow):
         self.runButton.setEnabled(True)
         self.modelComboBox.setEnabled(True)
         self.interfaceComboBox.setEnabled(True)
+
+    def run_thread(self):
+        self.worker = Worker()
+        self.threadpool.start(self.worker)
 
     def write(self, text):
         self.output_text.insertPlainText(text)
