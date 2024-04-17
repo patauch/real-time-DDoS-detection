@@ -5,16 +5,16 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout,
     QComboBox)
 import sys, traceback
+import os
 from .StdoutRedirector import OutputRedirector
 from .ThreadWorker import Worker
 from datetime import datetime
+import psutil
 
 
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-
-        
 
         self.last_startTime = None
 
@@ -28,8 +28,14 @@ class MainWindow(QMainWindow):
         self.stopButton.clicked.connect(self.stopButton_was_clicked)
 
         self.modelComboBox = QComboBox()
+        self.modelComboBox.addItems(self.getModelNames())
+        self.modelComboBox.activated.connect(self.activated)
+        self.modelComboBox.currentTextChanged.connect(self.text_changed)
+        self.modelComboBox.currentIndexChanged.connect(self.index_changed)
+        
 
         self.interfaceComboBox = QComboBox()
+        self.interfaceComboBox.addItems(self.getInterfaceNames())
 
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
@@ -124,6 +130,15 @@ class MainWindow(QMainWindow):
         self.output_text.clear()
         self.saveLogsButton.setEnabled(False)
 
+    def activated(self, index):
+        print(f"Activated index: {index}")
+
+    def text_changed(self, s):
+        print(f"Text changed: {s}")
+
+    def index_changed(self, index):
+        print(f"Index changed", index) 
+
     def error_recieved(self, *args):
         try:
             for arg in args:
@@ -136,3 +151,16 @@ class MainWindow(QMainWindow):
     
     def print_message(self, text):
         print(text)
+
+    def getModelNames(self):
+        path = "model/"
+        model_paths = os.listdir(path)
+        filtered_model_names = []
+        for path in model_paths:
+            p = path.split('.')
+            if p[-1] != "txt":
+                filtered_model_names.append(p[0])
+        return filtered_model_names
+    
+    def getInterfaceNames(self):
+        return list(psutil.net_if_addrs().keys())
