@@ -4,6 +4,7 @@ from pytestqt import qtbot
 import PyQt6
 import os
 import datetime
+import time
 
 
 def test_press_save_on_init(qtbot):
@@ -29,10 +30,11 @@ def test_press_save_after_stop(qtbot):
     qtbot.addWidget(widget)
 
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
-    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
+        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
 
     start_time = widget.get_last_startTime()
-
+    
     qtbot.mouseClick(widget.saveLogsButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
 
     assert os.path.exists(f"output/log_{start_time}.txt") == True and start_time != None
@@ -43,7 +45,8 @@ def test_clear_logs_after_save(qtbot):
     qtbot.addWidget(widget)
 
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
-    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
+        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
 
     start_time = widget.get_last_startTime()
 
@@ -72,7 +75,8 @@ def test_toggle_saveButton_after_init(qtbot):
     qtbot.addWidget(widget)
 
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
-    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
+        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
 
     assert widget.saveLogsButton.isEnabled() == True
 
