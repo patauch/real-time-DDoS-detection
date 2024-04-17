@@ -10,13 +10,17 @@ from .StdoutRedirector import OutputRedirector
 from .ThreadWorker import Worker
 from datetime import datetime
 import psutil
-
+from copy import copy
 
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
 
         self.last_startTime = None
+        self.availableModels = None
+        self.availableInterfaces = None
+        self.selectedModel = None
+        self.selectedInterface = None
 
         self.setWindowTitle("DDoS Detection")
 
@@ -29,13 +33,12 @@ class MainWindow(QMainWindow):
 
         self.modelComboBox = QComboBox()
         self.modelComboBox.addItems(self.getModelNames())
-        self.modelComboBox.activated.connect(self.activated)
-        self.modelComboBox.currentTextChanged.connect(self.text_changed)
-        self.modelComboBox.currentIndexChanged.connect(self.index_changed)
+        self.modelComboBox.activated.connect(self.activatedModel)
         
 
         self.interfaceComboBox = QComboBox()
         self.interfaceComboBox.addItems(self.getInterfaceNames())
+        self.interfaceComboBox.activated.connect(self.activatedInterface)
 
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
@@ -81,6 +84,14 @@ class MainWindow(QMainWindow):
         try:
             self.last_startTime = datetime.now().strftime("[%y.%m.%d;%H-%M-%S]")
 
+            if self.selectedModel is None:
+                self.selectedModel = self.modelComboBox.itemText(self.modelComboBox.currentIndex())
+                print(f"Selected model: {self.selectedModel}")
+
+            if self.selectedInterface is None:
+                self.selectedInterface = self.interfaceComboBox.itemText(self.interfaceComboBox.currentIndex())
+                print(f"Selected interface: {self.selectedInterface}")
+
             print("Run Button Clicked!")
             
             self.runButton.setEnabled(False)
@@ -116,11 +127,16 @@ class MainWindow(QMainWindow):
     def thread_complete(self):
         print("Run finished!")
 
+        self.selectedModel = None
+
+        self.selectedInterface = None
+
         self.saveLogsButton.setEnabled(True)
         self.stopButton.setEnabled(False)
         self.runButton.setEnabled(True)
         self.modelComboBox.setEnabled(True)
         self.interfaceComboBox.setEnabled(True)
+
         self.worker.stop()
 
     def saveLogsButton_was_clicked(self):
@@ -130,14 +146,13 @@ class MainWindow(QMainWindow):
         self.output_text.clear()
         self.saveLogsButton.setEnabled(False)
 
-    def activated(self, index):
-        print(f"Activated index: {index}")
+    def activatedModel(self, index):
+        self.selectedModel = self.modelComboBox.itemText(index)
+        print(f"Selected Model: {self.selectedModel}")
 
-    def text_changed(self, s):
-        print(f"Text changed: {s}")
-
-    def index_changed(self, index):
-        print(f"Index changed", index) 
+    def activatedInterface(self, index):
+        self.selectedInterface = self.interfaceComboBox.itemText(index)
+        print(f"Selected Interface: {self.selectedInterface}")
 
     def error_recieved(self, *args):
         try:
@@ -155,12 +170,13 @@ class MainWindow(QMainWindow):
     def getModelNames(self):
         path = "model/"
         model_paths = os.listdir(path)
-        filtered_model_names = []
+        filtered_model_names = {}
         for path in model_paths:
             p = path.split('.')
             if p[-1] != "txt":
-                filtered_model_names.append(p[0])
-        return filtered_model_names
+                filtered_model_names[p[0]]=path
+        self.availableModels = copy(filtered_model_names)
+        return filtered_model_names.keys()
     
     def getInterfaceNames(self):
         return list(psutil.net_if_addrs().keys())
