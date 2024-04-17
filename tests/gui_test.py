@@ -87,4 +87,25 @@ def test_loadInterfaces(qtbot):
     widget_ifaces = [widget.interfaceComboBox.itemText(i) for i in range(widget.interfaceComboBox.count())]
 
     assert ifaces == widget_ifaces
-  
+
+def test_setModel(qtbot):
+    widget = App.MainWindow.MainWindow()
+    qtbot.addWidget(widget)
+
+    widget_name = widget.modelComboBox.itemText(widget.modelComboBox.currentIndex())
+    qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    assert widget.selectedModel == widget_name
+    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
+        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    assert widget.selectedModel == None
+
+def test_setInterface(qtbot):
+    widget = App.MainWindow.MainWindow()
+    qtbot.addWidget(widget)
+
+    widget_name = widget.interfaceComboBox.itemText(widget.interfaceComboBox.currentIndex())
+    qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    assert widget.selectedInterface == widget_name
+    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
+        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    assert widget.selectedInterface == None
