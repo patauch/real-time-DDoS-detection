@@ -12,6 +12,7 @@ lightning = "^2.2.2"
 scikit-learn = "^1.4.2"
 pyqt6 = "^6.6.1"
 pytest-qt = "^4.4.0"
+psutil = "^5.9.8"
 
 
 [build-system]
