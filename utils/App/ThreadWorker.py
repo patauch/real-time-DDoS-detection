@@ -23,11 +23,10 @@ class Worker(QRunnable):
             #print("Thread start")
             for i in range(1000):
                 if self.is_stopped:
-                    break
-                    
-                time.sleep(1)                
+                    break                              
                 string = f"Time slept {i+1}"
                 self.signals.prints.emit(string)
+            time.sleep(2)  
                 
         except:
             traceback.print_exc()
