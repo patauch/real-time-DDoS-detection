@@ -20,7 +20,6 @@ class Worker(QRunnable):
     @pyqtSlot()
     def run(self):
         try:
-            #print("Thread start")
             for i in range(1000):
                 if self.is_stopped:
                     break                              
