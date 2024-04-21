@@ -2,12 +2,14 @@ from PyQt6.QtCore import Qt, QThreadPool
 from PyQt6.QtWidgets import (
     QMainWindow, QPushButton,
     QWidget, QTextEdit,
-    QVBoxLayout, QHBoxLayout,
-    QComboBox)
+    QVBoxLayout, QHBoxLayout, QStackedLayout,
+    QComboBox, QCheckBox,
+    QFileDialog)
 import sys, traceback
 import os
 from .StdoutRedirector import OutputRedirector
 from .ThreadWorker import Worker
+from ..Sniffer.sniffer import SnifferModel
 from datetime import datetime
 import psutil
 from copy import copy
@@ -21,6 +23,10 @@ class MainWindow(QMainWindow):
         self.availableInterfaces = None
         self.selectedModel = None
         self.selectedInterface = None
+        self.selectedPCAP = None
+        self.selectedWorkMode = None
+
+        self.snifferModel = None
 
         self.setWindowTitle("DDoS Detection")
 
@@ -35,10 +41,19 @@ class MainWindow(QMainWindow):
         self.modelComboBox.addItems(self.getModelNames())
         self.modelComboBox.activated.connect(self.activatedModel)
         
+        self.workMode = QCheckBox('Analysis local files')
+        self.workMode.setCheckState(Qt.CheckState.Unchecked)
+        self.workMode.stateChanged.connect(self.activateCheckBox)
 
         self.interfaceComboBox = QComboBox()
         self.interfaceComboBox.addItems(self.getInterfaceNames())
         self.interfaceComboBox.activated.connect(self.activatedInterface)
+
+        self.browseButton = QPushButton("Select file")
+        self.browseButton.clicked.connect(self.openFileDialog)
+
+        self.fileName_text = QTextEdit()
+        self.fileName_text.setReadOnly(True)
 
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
@@ -61,8 +76,15 @@ class MainWindow(QMainWindow):
         self.headerLayout = QHBoxLayout()
         self.headerLayout.addWidget(self.runButton)
         self.headerLayout.addWidget(self.modelComboBox)
-        self.headerLayout.addWidget(self.interfaceComboBox)
         self.headerLayout.addWidget(self.stopButton)
+
+        self.workModeLayout = QStackedLayout()
+        self.workModeLayout.addWidget(self.interfaceComboBox)
+        self.workModeLayout.addWidget(self.browseButton)
+
+        self.sourceLayout = QHBoxLayout()
+        self.sourceLayout.addWidget(self.workMode)
+        self.sourceLayout.addLayout(self.workModeLayout)
 
         self.loggerLayout = QHBoxLayout()
         self.loggerLayout.addWidget(self.output_text)
@@ -72,6 +94,7 @@ class MainWindow(QMainWindow):
 
 
         self.mainLayout.addLayout(self.headerLayout)
+        self.mainLayout.addLayout(self.sourceLayout)
         self.mainLayout.addLayout(self.loggerLayout)
         self.mainLayout.addLayout(self.bottomLayout)
 
@@ -102,6 +125,10 @@ class MainWindow(QMainWindow):
 
             self.interfaceComboBox.setEnabled(False)
             print("Interface Selection is disabled")
+
+            self.snifferModel = SnifferModel(self.selectedModel,
+                                              self.availableModels[self.selectedModel],
+                                              self.selectedInterface)
 
             self.run_thread()
         except:
@@ -180,3 +207,16 @@ class MainWindow(QMainWindow):
     
     def getInterfaceNames(self):
         return list(psutil.net_if_addrs().keys())
+    
+    def activateCheckBox(self, s):
+        if s == 0:
+            self.workModeLayout.setCurrentIndex(0)
+            self.selectedWorkMode = "Live"
+        if s == 2:
+            self.workModeLayout.setCurrentIndex(1)
+            self.selectedWorkMode = "Offline"
+
+
+    def openFileDialog(self):
+        fname = QFileDialog.getOpenFileName(self, 'Open file', '.\pcap', 'PCAP files (*.pcap)')
+        self.selectedPCAP = fname[0]
