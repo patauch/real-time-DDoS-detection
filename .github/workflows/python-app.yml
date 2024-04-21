@@ -27,7 +27,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.local
-        ley: poetry-1.8.2
+        key: poetry-1.8.2
     - uses: snok/install-poetry@v1
       with:
         version: 1.8.2
