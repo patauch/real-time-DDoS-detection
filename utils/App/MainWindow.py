@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
         self.modelComboBox.addItems(self.getModelNames())
         self.modelComboBox.activated.connect(self.activatedModel)
         
-        self.workMode = QCheckBox('Analysis local files')
+        self.workMode = QCheckBox('Use offline analysis')
         self.workMode.setCheckState(Qt.CheckState.Unchecked)
         self.workMode.stateChanged.connect(self.activateCheckBox)
 
@@ -126,9 +126,14 @@ class MainWindow(QMainWindow):
             self.interfaceComboBox.setEnabled(False)
             print("Interface Selection is disabled")
 
-            self.snifferModel = SnifferModel(self.selectedModel,
+            self.workMode.setEnabled(False)
+            self.browseButton.setEnabled(False)
+            try:
+                self.snifferModel = SnifferModel(self.selectedModel,
                                               self.availableModels[self.selectedModel],
                                               self.selectedInterface)
+            except:
+                print("Model isn't implemented yet")
 
             self.run_thread()
         except:
@@ -162,6 +167,8 @@ class MainWindow(QMainWindow):
         self.stopButton.setEnabled(False)
         self.runButton.setEnabled(True)
         self.modelComboBox.setEnabled(True)
+        self.workMode.setEnabled(True)
+        self.browseButton.setEnabled(True)
         self.interfaceComboBox.setEnabled(True)
 
         self.worker.stop()
@@ -180,6 +187,20 @@ class MainWindow(QMainWindow):
     def activatedInterface(self, index):
         self.selectedInterface = self.interfaceComboBox.itemText(index)
         print(f"Selected Interface: {self.selectedInterface}")
+
+    def activateCheckBox(self, s):
+        if s == 0:
+            self.workModeLayout.setCurrentIndex(0)
+            self.selectedWorkMode = "Live"
+        if s == 2:
+            self.workModeLayout.setCurrentIndex(1)
+            self.selectedWorkMode = "Offline"
+
+
+    def openFileDialog(self):
+        fname = QFileDialog.getOpenFileName(self, 'Open file', '.\pcap', 'PCAP files (*.pcap)')
+        self.selectedPCAP = fname[0]
+
 
     def error_recieved(self, *args):
         try:
@@ -207,16 +228,3 @@ class MainWindow(QMainWindow):
     
     def getInterfaceNames(self):
         return list(psutil.net_if_addrs().keys())
-    
-    def activateCheckBox(self, s):
-        if s == 0:
-            self.workModeLayout.setCurrentIndex(0)
-            self.selectedWorkMode = "Live"
-        if s == 2:
-            self.workModeLayout.setCurrentIndex(1)
-            self.selectedWorkMode = "Offline"
-
-
-    def openFileDialog(self):
-        fname = QFileDialog.getOpenFileName(self, 'Open file', '.\pcap', 'PCAP files (*.pcap)')
-        self.selectedPCAP = fname[0]
