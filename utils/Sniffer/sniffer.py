@@ -3,7 +3,8 @@ this file should declare sniffer functions to be called from main
 '''
 import pickle
 import os
-from scapy.sendrecv import sniff
+
+from scapy.sendrecv import AsyncSniffer
 import traceback
 from .model import Model
 from ..Flow.flow import Flow
@@ -22,9 +23,10 @@ class SnifferModel():
 
     def run(self):
         if self.mode == "Live":
-            sniff(offline=self.pcap_path, prn=self.newPacket)
+            t = AsyncSniffer(offline=self.pcap_path, prn=self.newPacket)
         else:
-            sniff(iface=self.interface, prn=self.newPacket)
+            t  = AsyncSniffer(iface=self.interface, prn=self.newPacket)
+        t.start()
         for flow in self.current_flows.values():
             self.classify(flow.terminated())
 
