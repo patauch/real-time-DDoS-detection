@@ -5,57 +5,17 @@ This class is designed to store info about packets and flow
 class FlowFeatures:
     def __init__(self):
         self.dest_port = 0
-        self.flow_duration = 0
-
-        self.bwd_packet_len_max = 0
-
-        self.bwd_packet_len_mean = 0
-        self.bwd_packet_len_std = 0
-
-        self.flow_IAT_mean = 0
-        self.flow_IAT_std = 0
-        self.flow_IAT_max = 0
-        self.flow_IAT_min = 0
-
-        self.fwd_IAT_total = 0
-        self.fwd_IAT_mean = 0
-        self.fwd_IAT_std = 0
-        self.fwd_IAT_max = 0
-        self.fwd_IAT_min = 0
-
-        self.bwd_IAT_total = 0
-        self.bwd_IAT_mean = 0
-        self.bwd_IAT_std = 0
-        self.bwd_IAT_max = 0
-        self.bwd_IAT_min = 0
-
-        self.fwd_PSH_flags = 0
-
-        self.max_packet_len = 0
-        self.packet_len_mean = 0
-        self.packet_len_std = 0
-        self.packet_len_var = 0
-
-        self.FIN_flag_count = 0
-        self.SYN_flag_count = 0
-        self.PSH_flag_count = 0
-        self.ACK_flag_count = 0
-        self.URG_flag_count = 0
-
-        self.avg_packet_size = 0
-
-        self.avg_bwd_segment_size = 0
-
-        #default to -1
-        self.init_win_bytes_forward = -1
-
-        self.active_min = 0
-        self.active_std = 0
-
-        self.idle_mean = 0
-        self.idle_std = 0
-        self.idle_max = 0
-        self.idle_min = 0
+        self.flow_dur = 0
+        self.p_len = PacketLength()
+        self.p_stats = PacketStats()
+        self.iat = IAT()  
+        self.p_time = PacketTime()
+        self.flow_bytes = FlowBytes()
+        self.active_stats = ActiveStats()
+        self.idle_stats = IdleStats()
+        self.flags = FlagCount()
+        self.subflow = SubflowInfo()
+        self.init_win = InitWinBytes()
 
     def getDestPort(self):
         return self.dest_port
@@ -64,53 +24,201 @@ class FlowFeatures:
         self.dest_port = value
 
     def getFlowDuration(self):
-        return self.flow_duration
+        return self.flow_dur
 
     def setFlowDuration(self, value):
-        self.flow_duration = int(round(value))
+        self.flow_dur = int(round(value))    
+ 
 
+class PacketLength():
+    '''
+    This class is used to store info consisting of packet quantity
+    '''
+    def __init__(self) -> None:
+        self.total_fwd_packets = 0
+        self.total_bwd_packets = 0
+
+    def getTotalFwdPacketsNum(self):
+        return self.total_fwd_packets
+    
+    def setTotalFwdPacketsNum(self, value):
+        self.total_fwd_packets = value
+
+    def getTotalBwdPacketsNum(self):
+        return self.total_bwd_packets
+    
+    def setTotalBwdPacketsNum(self, value):
+        self.total_bwd_packets = value
+
+
+class PacketStats():
+    '''
+    This class is used to store PacketStats info
+    '''
+    def __init__(self) -> None:
+        self.flStats = FlowPacketStats()
+        self.fwdStats = FwdPacketStats()
+        self.bwdStats = BwdPacketStats()
+
+
+class FlowPacketStats():
+    '''
+    This class is used to store info about overall packet stats
+    '''
+    def __init__(self) -> None:
+        self.avg_packet_size = 0
+        self.max_packet_len = 0
+        self.mean_packet_len = 0
+        self.std_packet_len = 0
+        self.var_packet_len = 0
+    
+    def getMaxPacketLen(self):
+        return self.max_packet_len
+
+    def setMaxPacketLen(self, value):
+        self.max_packet_len = value
+
+    def getPacketLenMean(self):
+        return self.mean_packet_len
+
+    def setPacketLenMean(self, value):
+        self.mean_packet_len = value
+
+    def getPacketLenStd(self):
+        return self.std_packet_len
+
+    def setPacketLenStd(self, value):
+        self.std_packet_len = value
+
+    def getPacketLenVar(self):
+        return self.var_packet_len
+
+    def setPacketLenVar(self, value):
+        self.var_packet_len = value
+ 
+    def getAvgPacketSize(self):
+        return self.avg_packet_size
+
+    def setAvgPacketSize(self, value):
+        self.avg_packet_size = value
+
+
+class FwdPacketStats():
+    '''
+    This class is used to store stats of forward packets
+    '''
+    def __init__(self) -> None:
+        self.max_packet_length = 0
+        self.mean_packet_length = 0
+        self.std_packet_length = 0
+    
+    def getFwdPacketLenMax(self):
+        return self.max_packet_length
+
+    def setFwdPacketLenMax(self, value):
+        self.max_packet_length = value
+
+    def getFwdPacketLenMean(self):
+        return self.mean_packet_length
+    
+    def setFwdPacketLenMean(self, value):
+        self.mean_packet_length = value
+
+    def getFwdPacketLenStd(self):
+        return self.std_packet_length
+
+    def setFwdPacketLenStd(self, value):
+        self.std_packet_length = value
+
+
+class BwdPacketStats():
+    '''
+    This class is used to store stats of backward packets
+    '''
+    def __init__(self) -> None:
+        self.max_packet_len = 0
+        self.min_packet_len = 0
+        self.mean_packet_len = 0
+        self.std_packet_len = 0
+    
     def getBwdPacketLenMax(self):
-        return self.bwd_packet_len_max
+        return self.max_packet_len
 
     def setBwdPacketLenMax(self, value):
-        self.bwd_packet_len_max = value
+        self.max_packet_len = value
+
+    def getBwdPacketLenMin(self):
+        return self.min_packet_len
+    
+    def setBwdPacketLenMin(self, value):
+        self.min_packet_len = value
 
     def getBwdPacketLenMean(self):
-        return self.bwd_packet_len_mean
+        return self.mean_packet_len
 
     def setBwdPacketLenMean(self, value):
-        self.bwd_packet_len_mean = value
+        self.mean_packet_len = value
 
     def getBwdPacketLenStd(self):
-        return self.bwd_packet_len_std
+        return self.std_packet_len
 
     def setBwdPacketLenStd(self, value):
-        self.bwd_packet_len_std = value
+        self.std_packet_len = value
 
+
+class IAT():
+    '''
+    This class is used to store info of IAT
+    '''
+    def __init__(self) -> None:
+        self.flowIAT = FlowIAT()
+        self.fwdIAT = FwdIAT()
+        self.bwdIAT = BwdIAT()
+
+    
+class FlowIAT():
+    def __init__(self) -> None:
+        self.mean_IAT = 0
+        self.std_IAT = 0
+        self.max_IAT = 0 # delete usage
+        self.min_IAT = 0 # delete usage
+    
     def getFlowIATMean(self):
-        return self.flow_IAT_mean
+        return self.mean_IAT
 
     def setFlowIATMean(self, value):
-        self.flow_IAT_mean = int(round(value))
+        self.mean_IAT = int(round(value))
 
     def getFlowIATStd(self):
-        return self.flow_IAT_std
+        return self.std_IAT
 
     def setFlowIATStd(self, value):
-        self.flow_IAT_std = value
+        self.std_IAT = value
 
     def getFlowIATMax(self):
-        return self.flow_IAT_max
+        return self.max_IAT
 
     def setFlowIATMax(self, value):
-        self.flow_IAT_max = int(round(value))
+        self.max_IAT = int(round(value))
 
     def getFlowIATMin(self):
-        return self.flow_IAT_min
+        return self.min_IAT
 
     def setFlowIATMin(self, value):
-        self.flow_IAT_min = int(round(value))
+        self.min_IAT = int(round(value))
 
+
+class FwdIAT():
+    '''
+    This class is used to store info about forward IAT
+    '''
+    def __init__(self) -> None:
+        self.total_IAT = 0
+        self.mean_IAT = 0
+        self.std_IAT = 0
+        self.max_IAT = 0
+        self.min_IAT = 0 # delete usage
+    
     def getFwdIATTotal(self):
         return self.fwd_IAT_total
 
@@ -141,6 +249,18 @@ class FlowFeatures:
     def setFwdIATMin(self, value):
         self.fwd_IAT_min = int(round(value))
 
+    
+class BwdIAT():
+    '''
+    This class is used to store info about backward IAT
+    '''
+    def __init__(self) -> None:
+        self.total_IAT = 0 # delete usage
+        self.mean_IAT = 0 # delete usage
+        self.std_IAT = 0 # delete usage
+        self.max_IAT = 0 # delete usage
+        self.min_IAT = 0 # delete usage
+    
     def getBwdIATTotal(self):
         return self.bwd_IAT_total
 
@@ -171,116 +291,254 @@ class FlowFeatures:
     def setBwdIATMin(self, value):
         self.bwd_IAT_min = int(round(value))
 
-    def getFwdPSHFlags(self):
-        return self.fwd_PSH_flags
 
-    def setFwdPSHFlags(self, value):
-        self.fwd_PSH_flags = value
+class PacketTime():
+    '''
+    This class is used for storing info about packet rates
+    '''
+    def __init__(self) -> None:
+        self.bwd_packets_rate = 0
+        self.fl_bytes_rate = 0
+        self.fl_packets_rate = 0
 
-    def getMaxPacketLen(self):
-        return self.max_packet_len
+    def getBwdPacketsRate(self):
+        return self.bwd_packets_rate
+    
+    def setBwdPacketsRate(self, value):
+        self.bwd_packets_rate = value
 
-    def setMaxPacketLen(self, value):
-        self.max_packet_len = value
+    def getFlowBytesRate(self):
+        return self.fl_bytes_rate
 
-    def getPacketLenMean(self):
-        return self.packet_len_mean
+    def setFlowBytesRate(self, value):
+        self.fl_bytes_rate = value
 
-    def setPacketLenMean(self, value):
-        self.packet_len_mean = value
+    def getFlowPacketsRate(self):
+        return self.fl_packets_rate
+    
+    def setFlowPacketsRate(self, value):
+        self.fl_packets_rate = value
 
-    def getPacketLenStd(self):
-        return self.packet_len_std
+    
+class FlowBytes():
+    '''
+    This class is used to store info about size info
+    '''
+    def __init__(self) -> None:
+        self.total_length_of_fwd_packets = 0
+        self.total_length_of_bwd_packets = 0
 
-    def setPacketLenStd(self, value):
-        self.packet_len_std = value
+        self.fwd_header_length = 0
+        self.bwd_header_length = 0
 
-    def getPacketLenVar(self):
-        return self.packet_len_var
+        self.avg_fwd_segment_size = 0
+        self.avg_bwd_segment_size = 0
 
-    def setPacketLenVar(self, value):
-        self.packet_len_var = value
+        self.min_seg_size_forward = 0
 
-    def getFINFlagCount(self):
-        return self.FIN_flag_count
+    def getTotalLenFwdPackets(self):
+        return self.total_length_of_fwd_packets
+    
+    def setTotalLenFwdPackets(self, value):
+        self.total_length_of_fwd_packets = value
 
-    def setFINFlagCount(self, value):
-        self.FIN_flag_count = value
+    def getTotalLenBwdPackets(self):
+        return self.total_length_of_bwd_packets
+    
+    def setTotalLenBwdPackets(self, value):
+        self.total_length_of_bwd_packets = value
 
-    def getSYNFlagCount(self):
-        return self.SYN_flag_count
+    def getFwdHeaderLength(self):
+        return self.fwd_header_length
+    
+    def setFwdHeaderLength(self, value):
+        self.fwd_header_length = value
 
-    def setSYNFlagCount(self, value):
-        self.SYN_flag_count = value
+    def getBwdHeaderLength(self):
+        return self.bwd_header_length
+    
+    def setBwdHeaderLength(self, value):
+        self.bwd_header_length = value
 
-    def getPSHFlagCount(self):
-        return self.PSH_flag_count
+    def getAvgFwdSegmentSize(self):
+        return self.avg_fwd_segment_size
 
-    def setPSHFlagCount(self, value):
-        self.PSH_flag_count = value
-
-    def getACKFlagCount(self):
-        return self.ACK_flag_count
-
-    def setACKFlagCount(self, value):
-        self.ACK_flag_count = value
-
-    def getURGFlagCount(self):
-        return self.URG_flag_count
-
-    def setURGFlagCount(self, value):
-        self.URG_flag_count = value
-
-    def getAvgPacketSize(self):
-        return self.avg_packet_size
-
-    def setAvgPacketSize(self, value):
-        self.avg_packet_size = value
+    def setAvgFwdSegmentSize(self, value):
+        self.avg_fwd_segment_size = value
 
     def getAvgBwdSegmentSize(self):
         return self.avg_bwd_segment_size
 
     def setAvgBwdSegmentSize(self, value):
         self.avg_bwd_segment_size = value
+    
+    def getMinSegSizeFwd(self):
+        return self.min_seg_size_forward
+    
+    def setMinSegSizeFwd(self, value):
+        self.min_seg_size_forward = value
 
-    def getInitWinBytesFwd(self):
-        return self.init_win_bytes_forward
 
-    def setInitBytesFwd(self, value):
-        self.init_win_bytes_forward = value
-
-    def setActiveSTD(self, value):
-        self.active_std = value
-
-    def getActiveSTD(self):
-        return self.active_std
+class ActiveStats():
+    '''
+    This class is used to store info about active stats
+    '''
+    def __init__(self) -> None:
+        
+        self.min = 0
+        self.std = 0 # delete usage
+        self.mean = 0
 
     def getActiveMin(self):
-        return self.active_min
+        return self.min
 
     def setActiveMin(self, value):
-        self.active_min = value
+        self.min = value
+
+    def getActiveSTD(self):
+        return self.std
+    
+    def setActiveSTD(self, value):
+        self.std = value
+
+    def getActiveMean(self):
+        return self.mean
+
+    def setActiveMean(self, value):
+        self.mean = value
+
+
+class IdleStats():
+    '''
+    This class is used to store info about Idle stats
+    '''
+    def __init__(self) -> None:
+        self.mean_ = 0 # delete usage
+        self.std_ = 0 # delete usage
+        self.max_ = 0 # delete usage
+        self.min_ = 0 # delete usage
 
     def getIdleMean(self):
-        return self.idle_mean
+        return self.mean
 
     def setIdleMean(self, value):
-        self.idle_mean = value
+        self.mean = value
 
     def getIdleStd(self):
-        return self.idle_std
+        return self.std_
 
     def setIdleStd(self, value):
-        self.idle_std = value
+        self.std_ = value
 
     def getIdleMax(self):
-        return self.idle_max
+        return self.max_
 
     def setIdleMax(self, value):
-        self.idle_max = value
+        self.max_ = value
 
     def getIdleMin(self):
-        return self.idle_min
+        return self.min_
 
     def setIdleMin(self, value):
-        self.idle_min = value
+        self.min_ = value
+
+
+class FlagCount():
+    '''
+    This class is used for storing info about flags
+    '''
+    def __init__(self) -> None:
+        self.FIN_flag_ = 0 # delete usage
+        self.SYN_flag_ = 0 # delete usage
+        self.PSH_flag_ = 0
+        self.ACK_flag_ = 0 # delete usage
+        self.URG_flag_ = 0 # delete usage
+
+        self.fwd_PSH_flags = 0
+    
+    def getFINFlag(self):
+        return self.FIN_flag_
+
+    def setFINFlag(self, value):
+        self.FIN_flag_ = value
+
+    def getSYNFlag(self):
+        return self.SYN_flag_
+
+    def setSYNFlag(self, value):
+        self.SYN_flag_ = value
+
+    def getPSHFlag(self):
+        return self.PSH_flag_
+
+    def setPSHFlag(self, value):
+        self.PSH_flag_ = value
+
+    def getACKFlag(self):
+        return self.ACK_flag_
+
+    def setACKFlag(self, value):
+        self.ACK_flag_ = value
+
+    def getURGFlag(self):
+        return self.URG_flag_
+
+    def setURGFlag(self, value):
+        self.URG_flag_ = value
+
+    def getFwdPSHFlags(self):
+        return self.fwd_PSH_flags
+
+    def setFwdPSHFlags(self, value):
+        self.fwd_PSH_flags = value
+
+
+class SubflowInfo():
+    def __init__(self) -> None:
+        self.fwd_packets = 0    
+        self.fwd_bytes = 0  
+        self.bwd_packets = 0
+        self.bwd_bytes = 0
+    
+    def getSubflowFwdPackets(self):
+        return self.fwd_packets
+    
+    def setSubflowFwdPackets(self, value):
+        self.fwd_packets = value
+
+    def getSubflowFwdBytes(self):
+        return self.fwd_bytes
+    
+    def setSubflowFwdBytes(self, value):
+        self.fwd_bytes = value
+
+    def getSubflowBwdPackets(self):
+        return self.bwd_packets
+    
+    def setSubflowBwdPackets(self, value):
+        self.bwd_packets = value
+
+    def getSubflowBwdBytes(self):
+        return self.bwd_bytes
+    
+    def setSubflowBwdBytes(self, value):
+        self.bwd_bytes = value
+
+
+class InitWinBytes():
+    def __init__(self) -> None:
+        #default to -1
+        self._forward = -1
+        self._backward = -1
+    
+    def getInitWinBytesFwd(self):
+        return self._forward
+
+    def setInitBytesFwd(self, value):
+        self._forward = value
+
+    def getInitWinBytesBwd(self):
+        return self._backward
+    
+    def setInitBytesBwd(self, value): # todo
+        self._backward = value
