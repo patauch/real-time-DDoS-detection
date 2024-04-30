@@ -189,12 +189,10 @@ class Flow:
         return [self.flowFeatures.getDestPort(),
                 self.flowFeatures.getFlowDuration(),
                 self.flowFeatures.p_len.getTotalFwdPacketsNum(),
-                self.flowFeatures.p_len.getTotalBwdPacketsNum(),
                 self.flowFeatures.flow_bytes.getTotalLenFwdPackets(),
-                self.flowFeatures.flow_bytes.getTotalLenBwdPackets(),
-                #forward stats
                 self.flowFeatures.p_stats.fwdStats.getFwdPacketLenMax(),
                 self.flowFeatures.p_stats.fwdStats.getFwdPacketLenMean(),
+                self.flowFeatures.p_stats.fwdStats.getFwdPacketLenStd(),             
                 #backward stats
                 self.flowFeatures.p_stats.bwdStats.getBwdPacketLenMax(),
                 self.flowFeatures.p_stats.bwdStats.getBwdPacketLenMin(),
@@ -203,37 +201,41 @@ class Flow:
                 #Rates
                 self.flowFeatures.p_time.getFlowBytesRate(),
                 self.flowFeatures.p_time.getFlowPacketsRate(),
-                self.flowFeatures.p_time.getBwdPacketsRate(),
+                
                 #Flow Iat
                 self.flowFeatures.iat.flowIAT.getFlowIATMean(),
                 self.flowFeatures.iat.flowIAT.getFlowIATStd(),
                 self.flowFeatures.iat.flowIAT.getFlowIATMax(),
                 #fwd iat
+                self.flowFeatures.iat.fwdIAT.getFwdIATTotal(),
                 self.flowFeatures.iat.fwdIAT.getFwdIATMean(),
                 self.flowFeatures.iat.fwdIAT.getFwdIATStd(),
                 #headers
                 self.flowFeatures.flow_bytes.getFwdHeaderLength(),
                 self.flowFeatures.flow_bytes.getBwdHeaderLength(),
+                self.flowFeatures.p_time.getBwdPacketsRate(),
                 #flstats
                 self.flowFeatures.p_stats.flStats.getMaxPacketLen(),
                 self.flowFeatures.p_stats.flStats.getPacketLenMean(),
                 self.flowFeatures.p_stats.flStats.getPacketLenStd(),
                 self.flowFeatures.p_stats.flStats.getPacketLenVar(),
+                self.flowFeatures.flags.getPSHFlag(),
                 self.flowFeatures.p_stats.flStats.getAvgPacketSize(),
                 #flags
-                self.flowFeatures.flags.getPSHFlag(),
                 #segments
                 self.flowFeatures.flow_bytes.getAvgFwdSegmentSize(),
                 self.flowFeatures.flow_bytes.getAvgBwdSegmentSize(),
-                self.flowFeatures.flow_bytes.getMinSegSizeFwd(),
+                
                 #subflow
                 self.flowFeatures.subflow.getSubflowFwdPackets(),
                 self.flowFeatures.subflow.getSubflowFwdBytes(),
+                self.flowFeatures.subflow.getSubflowBwdPackets(),
                 self.flowFeatures.subflow.getSubflowBwdBytes(),
                 #initbytes
                 self.flowFeatures.init_win.getInitWinBytesFwd(),
                 self.flowFeatures.init_win.getInitWinBytesBwd(),
                 #active stat
-                self.flowFeatures.active_stats.getActiveMean(),
+                self.flowFeatures.flow_bytes.getMinSegSizeFwd(),
+                #self.flowFeatures.active_stats.getActiveMean(),
                 self.flowFeatures.active_stats.getActiveMin()
                 ]
