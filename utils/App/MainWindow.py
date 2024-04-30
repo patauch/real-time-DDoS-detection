@@ -9,7 +9,6 @@ import sys, traceback
 import os
 from .StdoutRedirector import OutputRedirector
 from .ThreadWorker import Worker
-from ..Sniffer.sniffer import SnifferModel
 from datetime import datetime
 import psutil
 from copy import copy
@@ -111,31 +110,38 @@ class MainWindow(QMainWindow):
                 self.selectedModel = self.modelComboBox.itemText(self.modelComboBox.currentIndex())
                 print(f"Selected model: {self.selectedModel}")
 
-            if self.selectedInterface is None:
+            if self.selectedInterface is None and self.selectedWorkMode!="Offline":
                 self.selectedInterface = self.interfaceComboBox.itemText(self.interfaceComboBox.currentIndex())
                 print(f"Selected interface: {self.selectedInterface}")
-
-            print("Run Button Clicked!")
             
-            self.runButton.setEnabled(False)
-            self.stopButton.setEnabled(True)
+            if not self.selectedPCAP and self.selectedWorkMode=="Offline":
+                print("Haven't selected PCAP")
+                pass
+            else:
 
-            self.modelComboBox.setEnabled(False)
-            print("Model Selection is disabled")
+                print("Run Button Clicked!")
+                
+                self.runButton.setEnabled(False)
+                self.stopButton.setEnabled(True)
 
-            self.interfaceComboBox.setEnabled(False)
-            print("Interface Selection is disabled")
+                self.modelComboBox.setEnabled(False)
+                print("Model Selection is disabled")
 
-            self.workMode.setEnabled(False)
-            self.browseButton.setEnabled(False)
-            try:
-                self.snifferModel = SnifferModel(self.selectedModel,
-                                              self.availableModels[self.selectedModel],
-                                              self.selectedInterface)
-            except:
-                print("Model isn't implemented yet")
+                self.interfaceComboBox.setEnabled(False)
+                print("Interface Selection is disabled")
 
-            self.run_thread()
+                self.workMode.setEnabled(False)
+                self.browseButton.setEnabled(False)
+                try:
+                    print("Nothing here")
+                    """self.snifferModel = SnifferModel(self.selectedModel,
+                                                self.availableModels[self.selectedModel], self.selectedWorkMode,
+                                                self.selectedInterface, self.selectedPCAP)"""
+                except:
+                    print("Model isn't implemented yet")
+                    traceback.print_exc()
+
+                self.run_thread()
         except:
             sys.stderr = self.old_stderr
             sys.stdout = self.old_stdout
@@ -146,8 +152,10 @@ class MainWindow(QMainWindow):
         self.worker.stop()
 
 
-    def run_thread(self):
-        self.worker = Worker()
+    def run_thread(self): 
+        self.worker = Worker(self.selectedModel,
+                             self.availableModels[self.selectedModel], self.selectedWorkMode,
+                             self.selectedInterface, self.selectedPCAP)
         self.worker.signals.finished.connect(self.thread_complete)
 
         self.worker.signals.error.connect(self.error_recieved)
