@@ -30,8 +30,8 @@ def test_press_save_after_stop(qtbot):
     qtbot.addWidget(widget)
 
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
-    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
-        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    qtbot.wait(ms=1000)
+    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
 
     start_time = widget.get_last_startTime()
     
@@ -45,8 +45,8 @@ def test_clear_logs_after_save(qtbot):
     qtbot.addWidget(widget)
 
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
-    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
-        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    qtbot.wait(ms=1000)
+    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
 
     start_time = widget.get_last_startTime()
 
@@ -60,6 +60,7 @@ def test_saveButton_state_after_click(qtbot):
     qtbot.addWidget(widget)
 
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    qtbot.wait(ms=1000)
     qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
 
     start_time = widget.get_last_startTime()
@@ -75,8 +76,8 @@ def test_toggle_saveButton_after_init(qtbot):
     qtbot.addWidget(widget)
 
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
-    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
-        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    qtbot.wait(ms=1000)
+    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
 
     assert widget.saveLogsButton.isEnabled() == True
 

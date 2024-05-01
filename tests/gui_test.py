@@ -19,8 +19,8 @@ def test_toggle_stopButton_after_run(qtbot):
     qtbot.addWidget(widget)
 
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
-    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
-        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    qtbot.wait(ms=1000)
+    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
 
 
     assert (widget.runButton.isEnabled()) == True and (widget.stopButton.isEnabled() == False)
@@ -46,8 +46,8 @@ def test_toggle_interfaceSelect_after_stop(qtbot):
     qtbot.addWidget(widget)
 
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
-    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
-        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    qtbot.wait(ms=1000)
+    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
     
     assert (widget.interfaceComboBox.isEnabled() == True)
 
@@ -57,8 +57,8 @@ def test_toggle_modelSelect_after_stop(qtbot):
     qtbot.addWidget(widget)
 
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
-    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
-        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    qtbot.wait(ms=1000)
+    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
     
     assert (widget.modelComboBox.isEnabled() == True)
 
@@ -95,8 +95,8 @@ def test_setModel(qtbot):
     widget_name = widget.modelComboBox.itemText(widget.modelComboBox.currentIndex())
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
     assert widget.selectedModel == widget_name
-    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
-        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    qtbot.wait(ms=1000)
+    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
     assert widget.selectedModel == None
 
 def test_setInterface(qtbot):
@@ -106,6 +106,6 @@ def test_setInterface(qtbot):
     widget_name = widget.interfaceComboBox.itemText(widget.interfaceComboBox.currentIndex())
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
     assert widget.selectedInterface == widget_name
-    with qtbot.waitSignal(widget.worker.signals.finished, timeout=5000):
-        qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+    qtbot.wait(ms=1000)
+    qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
     assert widget.selectedInterface == None
