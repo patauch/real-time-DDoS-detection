@@ -14,7 +14,7 @@ def test_load_model(qtbot):
     widget_name = widget.modelComboBox.itemText(widget.modelComboBox.currentIndex())
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
 
-    assert widget.snifferModel.model_name == widget_name
+    assert widget.worker.model_name == widget_name
 
     os.remove("model/test.sav")
 
@@ -30,8 +30,8 @@ def test_load_interface(qtbot):
 
     qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
 
-    assert widget.snifferModel.model_name == model_name
+    assert widget.worker.model_name == model_name
 
     os.remove("model/test.sav")
 
-    assert widget.snifferModel.interface == interface_name
+    assert widget.worker.interface == interface_name
