@@ -1,3 +1,5 @@
+import os
+
 import pickle
 import torch
 import pytorch_lightning as pl
@@ -6,7 +8,7 @@ class Model():
     def __init__(self, model_path, model_name) -> None:
         self.model_path = model_path
         self.model_name = model_name
-        self.model = pickle.load(open(self.model_path, 'rb'))
+        #self.model = pickle.load(open(os.path.join('model',self.model_path), 'rb'))
 
     def predict(self, features):
         if not isinstance(self.model, pl.LightningModule):

@@ -22,14 +22,15 @@ class WorkerSignals(QObject):
 
 class Worker(QRunnable):
     
-    def __init__(self, model_name, model_path, mode, interface=None, pcapPath=None) -> None:
+    def __init__(self) -> None:
         super(Worker, self).__init__()
         self.is_stopped = False
-        self.model_name = model_name
-        self.model = Model(model_path, model_name)
-        self.mode = mode
-        self.interface = interface
-        self.pcap_path = pcapPath
+        self.model_name = None
+        self.model_path = None
+        self.model = None
+        self.mode = None
+        self.interface = None
+        self.pcap_path = None
         self.current_flows = {}
         self.normalization = pickle.load(open(os.path.join("model/scalar.sav"), 'rb'))
         self.signals = WorkerSignals()
@@ -43,28 +44,27 @@ class Worker(QRunnable):
             else:
                 self.sniffer  = AsyncSniffer(offline=self.pcap_path, prn=self.test)
             self.sniffer.start()
-            for flow in self.current_flows.values():
-                    self.classify(flow.terminated())
-
             for i in range(1000):
                 if self.is_stopped:
                     break                              
                 string = f"Time slept {i+1}"
                 self.signals.prints.emit(string)
             time.sleep(2)  
-            self.sniffer.stop()
+            #self.sniffer.stop()
         except:
             traceback.print_exc()
             print(sys.exc_info()[:2])
 
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))
-        finally:
-            self.signals.finished.emit()
-
+            
     def stop(self):
         self.signals.prints.emit('Stop Sniffer')
         self.is_stopped = True
+        self.sniffer.stop()
+        for flow in self.current_flows.values():
+            self.classify(flow.terminated())
+        self.signals.finished.emit()
     
     def test(self, p):
         self.signals.prints.emit('test')
@@ -158,4 +158,11 @@ class Worker(QRunnable):
 
         except:
             traceback.print_exc()
-            
+
+    def set_params(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+    def set_model(self):
+        self.model = Model(model_name=self.model_name, model_path=self.model_path)
+
+    

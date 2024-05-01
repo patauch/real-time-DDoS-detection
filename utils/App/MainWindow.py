@@ -25,8 +25,6 @@ class MainWindow(QMainWindow):
         self.selectedPCAP = None
         self.selectedWorkMode = None
 
-        self.snifferModel = None
-
         self.setWindowTitle("DDoS Detection")
 
         self.runButton = QPushButton("Run Detection")
@@ -104,20 +102,28 @@ class MainWindow(QMainWindow):
 
     def runButton_was_clicked(self):
         try:
+            self.worker = Worker()
             self.last_startTime = datetime.now().strftime("[%y.%m.%d;%H-%M-%S]")
 
             if self.selectedModel is None:
                 self.selectedModel = self.modelComboBox.itemText(self.modelComboBox.currentIndex())
+                self.worker.set_params(model_name=self.selectedModel)
+                self.worker.set_params(model_path=self.availableModels[self.selectedModel])
+                self.worker.set_model()
                 print(f"Selected model: {self.selectedModel}")
 
             if self.selectedInterface is None and self.selectedWorkMode!="Offline":
                 self.selectedInterface = self.interfaceComboBox.itemText(self.interfaceComboBox.currentIndex())
+                self.worker.set_params(interface=self.selectedInterface)
                 print(f"Selected interface: {self.selectedInterface}")
             
             if not self.selectedPCAP and self.selectedWorkMode=="Offline":
                 print("Haven't selected PCAP")
                 pass
             else:
+                self.worker.set_params(pcap_path=self.selectedPCAP)
+
+                self.worker.set_params(mode=self.selectedWorkMode)
 
                 print("Run Button Clicked!")
                 
@@ -151,17 +157,13 @@ class MainWindow(QMainWindow):
         print("Stop Button Clicked")
         self.worker.stop()
 
-
     def run_thread(self): 
-        self.worker = Worker(self.selectedModel,
-                             self.availableModels[self.selectedModel], self.selectedWorkMode,
-                             self.selectedInterface, self.selectedPCAP)
         self.worker.signals.finished.connect(self.thread_complete)
 
         self.worker.signals.error.connect(self.error_recieved)
 
         self.worker.signals.prints.connect(self.print_message)
-
+        
         self.threadpool.start(self.worker)
 
     def thread_complete(self):
@@ -178,8 +180,7 @@ class MainWindow(QMainWindow):
         self.workMode.setEnabled(True)
         self.browseButton.setEnabled(True)
         self.interfaceComboBox.setEnabled(True)
-
-        self.worker.stop()
+        #self.worker.stop()
 
     def saveLogsButton_was_clicked(self):
         text = self.output_text.toPlainText()
