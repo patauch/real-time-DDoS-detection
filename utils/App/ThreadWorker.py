@@ -32,7 +32,7 @@ class Worker(QRunnable):
         self.interface = None
         self.pcap_path = None
         self.current_flows = {}
-        self.normalization = pickle.load(open(os.path.join("model/scalar.sav"), 'rb'))
+        self.normalization = pickle.load(open(os.path.join("model/utils/scaler.sav"), 'rb'))
         self.signals = WorkerSignals()
         self.sniffer = None
 
@@ -40,9 +40,9 @@ class Worker(QRunnable):
     def run(self):
         try:
             if self.mode == "Live":
-                self.sniffer = AsyncSniffer(iface=self.interface, prn=self.test)
+                self.sniffer = AsyncSniffer(iface=self.interface, prn=self.newPacket)
             else:
-                self.sniffer  = AsyncSniffer(offline=self.pcap_path, prn=self.test)
+                self.sniffer  = AsyncSniffer(offline=self.pcap_path, prn=self.newPacket)
             self.sniffer.start()
             for i in range(1000):
                 if self.is_stopped:
@@ -59,12 +59,17 @@ class Worker(QRunnable):
             self.signals.error.emit((exctype, value, traceback.format_exc()))
             
     def stop(self):
-        self.signals.prints.emit('Stop Sniffer')
+        
         self.is_stopped = True
         self.sniffer.stop()
-        for flow in self.current_flows.values():
-            self.classify(flow.terminated())
+        try:
+            for flow in self.current_flows.values():
+                self.classify(flow.terminated())
+        except Exception as e:
+            print(e)
+        self.signals.prints.emit('Stop Sniffer')
         self.signals.finished.emit()
+        
     
     def test(self, p):
         self.signals.prints.emit('test')
@@ -73,20 +78,20 @@ class Worker(QRunnable):
     def classify(self, features):
         # preprocess
         f = features
-
         features = self.normalization.transform([f])
         result = self.model.predict(features)
 
         feature_string = [str(i) for i in f]
         classification = [str(result[0])]
-        if result !='BENIGN':
-            self.signals.prints.emit(classification)
+        
+        #if result !='BENIGN':
+        self.signals.prints.emit(*classification)
 
         return feature_string + classification   
     
     def newPacket(self, p):
         try:
-            packet = PacketInfo()
+            packet = PacketInfo(p)
             packet.setDest(p)
             packet.setSrc(p)
             packet.setSrcPort(p)
@@ -105,8 +110,9 @@ class Worker(QRunnable):
             packet.setWinBytes(p)
             packet.setFwdID()
             packet.setBwdID()
-
-            if packet.getFwdID() in self.self.current_flows.keys():
+            
+            if packet.getFwdID() in self.current_flows.keys():
+                #self.signals.prints.emit('found flow fwd')
                 flow = self.current_flows[packet.getFwdID()]
 
                 # check for timeout
@@ -128,6 +134,7 @@ class Worker(QRunnable):
                     self.current_flows[packet.getFwdID()] = flow
 
             elif packet.getBwdID() in self.current_flows.keys():
+                #self.signals.prints.emit('found flow bwd')
                 flow = self.current_flows[packet.getBwdID()]
 
                 # check for timeout
@@ -147,7 +154,7 @@ class Worker(QRunnable):
                     flow.new(packet, 'bwd')
                     self.current_flows[packet.getBwdID()] = flow
             else:
-
+                #self.signals.prints.emit('new flow')
                 flow = Flow(packet)
                 self.current_flows[packet.getFwdID()] = flow
                 # current flows put id, (new) flow
