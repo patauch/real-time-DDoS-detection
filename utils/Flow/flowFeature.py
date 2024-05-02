@@ -220,34 +220,34 @@ class FwdIAT():
         self.min_IAT = 0 # delete usage
     
     def getFwdIATTotal(self):
-        return self.fwd_IAT_total
+        return self.total_IAT
 
     def setFwdIATTotal(self, value):
-        self.fwd_IAT_total = int(round(value))
+        self.total_IAT = int(round(value))
 
     def getFwdIATMean(self):
-        return self.fwd_IAT_mean
+        return self.mean_IAT
 
     def setFwdIATMean(self, value):
-        self.fwd_IAT_mean = value
+        self.mean_IAT = value
 
     def getFwdIATStd(self):
-        return self.fwd_IAT_std
+        return self.std_IAT
 
     def setFwdIATStd(self, value):
-        self.fwd_IAT_std = value
+        self.std_IAT = value
 
     def getFwdIATMax(self):
-        return self.fwd_IAT_max
+        return self.max_IAT
 
     def setFwdIATMax(self, value):
-        self.fwd_IAT_max = int(round(value))
+        self.max_IAT = int(round(value))
 
     def getFwdIATMin(self):
-        return self.fwd_IAT_min
+        return self.min_IAT
 
     def setFwdIATMin(self, value):
-        self.fwd_IAT_min = int(round(value))
+        self.min_IAT = int(round(value))
 
     
 class BwdIAT():

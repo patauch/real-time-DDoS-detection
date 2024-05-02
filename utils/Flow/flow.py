@@ -53,7 +53,7 @@ class Flow:
                 self.flowFeatures.p_stats.bwdStats.setBwdPacketLenMax(packet.getPayloadBytes())
             else:
                 self.flowFeatures.p_stats.bwdStats.setBwdPacketLenMax(
-                    max(self.flowFeatures.p_stats.bwdStats.getBwdPacketLenMax,
+                    max(self.flowFeatures.p_stats.bwdStats.getBwdPacketLenMax(),
                          packet.getPayloadBytes()))
                 self.bwdIAT.append((packet.getTimestamp() - self.bwdLastSeen) * 1000 * 1000)
 
@@ -64,7 +64,7 @@ class Flow:
             self.fwdPacketInfos.append(packet)
             self.fwdIAT.append((packet.getTimestamp() - self.fwdLastSeen) * 1000 * 1000)
             self.flowFeatures.flags.setFwdPSHFlags(max(1 if packet.getURGFlag() else 0,
-                                                 self.flowFeatures.getFwdPSHFlags()))
+                                                 self.flowFeatures.flags.getFwdPSHFlags()))
             self.fwd_packet_count = self.fwd_packet_count + 1
             self.fwdLastSeen = packet.getTimestamp()
 
@@ -120,9 +120,9 @@ class Flow:
                 self.flowFeatures.p_stats.bwdStats.setBwdPacketLenStd(statistics.stdev(bwd_packet_lens))
 
         total_packets_len = sum([x.getPayloadBytes() for x in self.packetInfos])
-        self.flowFeatures.p_time.setFlowBytesRate(total_packets_len / duration)
-        self.flowFeatures.p_time.setFlowPacketsRate(self.packet_count / duration)
-        self.flowFeatures.p_time.setBwdPacketsRate(sum(bwd_packet_lens) / duration)
+        self.flowFeatures.p_time.setFlowBytesRate(total_packets_len / duration if duration> 0 else 0)
+        self.flowFeatures.p_time.setFlowPacketsRate(self.packet_count / duration if duration> 0 else 0)
+        self.flowFeatures.p_time.setBwdPacketsRate(sum(bwd_packet_lens) / duration if duration> 0 else 0)
 
         if len(self.flowIAT) > 0:
             self.flowFeatures.iat.flowIAT.setFlowIATMean(statistics.mean(self.flowIAT))
@@ -175,15 +175,15 @@ class Flow:
             if len(self.flowIdle) > 1:
                 self.flowFeatures.idle_stats.setIdleStd(statistics.stdev(self.flowIdle))
 
-        fwd_header_length = sum(packet[IP].ihl*4 if TCP in packet else 8 for packet in self.fwdPacketInfos)
-        bwd_header_length = sum(packet[IP].ihl*4 if TCP in packet else 8 for packet in self.bwdPacketInfos)
+        fwd_header_length = sum(packet.p[IP].ihl*4 if TCP in packet.p else 8 for packet in self.fwdPacketInfos)
+        bwd_header_length = sum(packet.p[IP].ihl*4 if TCP in packet.p else 8 for packet in self.bwdPacketInfos)
         self.flowFeatures.flow_bytes.setFwdHeaderLength(fwd_header_length)
         self.flowFeatures.flow_bytes.setBwdHeaderLength(bwd_header_length)
 
         # Duplicated features
-        self.flowFeatures.subflow.setSubflowBwdBytes(self.flowFeatures.getTotalLenBwdPackets)
-        self.flowFeatures.subflow.setSubflowBwdPackets(self.flowFeatures.getTotalBwdPackets)
-        self.flowFeatures.subflow.setSubflowFwdBytes(self.flowFeatures.getTotalLenFwdPackets)
+        self.flowFeatures.subflow.setSubflowBwdBytes(self.flowFeatures.flow_bytes.getTotalLenBwdPackets())
+        self.flowFeatures.subflow.setSubflowBwdPackets(self.flowFeatures.p_len.getTotalBwdPacketsNum())
+        self.flowFeatures.subflow.setSubflowFwdBytes(self.flowFeatures.flow_bytes.getTotalLenFwdPackets())
 
         #TODO: rewrite to generator (hide all function calls)
         return [self.flowFeatures.getDestPort(),
