@@ -44,13 +44,6 @@ class Worker(QRunnable):
             else:
                 self.sniffer  = AsyncSniffer(offline=self.pcap_path, prn=self.newPacket)
             self.sniffer.start()
-            for i in range(1000):
-                if self.is_stopped:
-                    break                              
-                string = f"Time slept {i+1}"
-                self.signals.prints.emit(string)
-            time.sleep(2)  
-            #self.sniffer.stop()
         except:
             traceback.print_exc()
             print(sys.exc_info()[:2])

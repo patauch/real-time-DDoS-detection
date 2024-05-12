@@ -117,13 +117,14 @@ class MainWindow(QMainWindow):
 
             if self.selectedInterface is None and self.selectedWorkMode!="Offline":
                 self.selectedInterface = self.interfaceComboBox.itemText(self.interfaceComboBox.currentIndex())
+
                 print(f"Selected interface: {self.selectedInterface}")
             self.worker.set_params(interface=self.selectedInterface)
             
             if not self.selectedPCAP and self.selectedWorkMode=="Offline":
                 print("Haven't selected PCAP")
-                pass
             else:
+
                 self.worker.set_params(pcap_path=self.selectedPCAP)
                 self.worker.set_params(mode=self.selectedWorkMode)
 
@@ -181,6 +182,8 @@ class MainWindow(QMainWindow):
         self.selectedInterface = None
 
         self.unlock_buttons()
+
+        self.worker = None
         #self.worker.stop()
 
     def saveLogsButton_was_clicked(self):
@@ -229,7 +232,6 @@ class MainWindow(QMainWindow):
         filtered_model_names = {}
         for path in model_paths:
             p = path.split('.')
-            print(p, len(p))
             if p[-1] == "sav":
                 filtered_model_names[p[0]]=path
         self.availableModels = copy(filtered_model_names)
