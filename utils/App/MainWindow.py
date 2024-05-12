@@ -25,6 +25,7 @@ class MainWindow(QMainWindow):
         self.selectedPCAP = None
         self.selectedWorkMode = None
         self.InfoLV = 0
+        self.worker = None
 
         width = 400
         height = 300
@@ -233,7 +234,9 @@ class MainWindow(QMainWindow):
     def get_last_startTime(self):
         return self.last_startTime
     
-    def print_message(self, text, lv=0):
+    def print_message(self, str_res):
+        text = str_res[0]
+        lv = str_res[1]
         if lv <= self.InfoLV:
             print(text)
 
@@ -250,3 +253,11 @@ class MainWindow(QMainWindow):
     
     def getInterfaceNames(self):
         return list(psutil.net_if_addrs().keys())
+    
+    def closeEvent(self, event):
+        if self.worker:
+            self.worker.stop()
+        if self.worker == None:
+            event.accept()
+        else:
+            event.ignore()
