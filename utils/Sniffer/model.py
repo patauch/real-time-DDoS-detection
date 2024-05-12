@@ -3,6 +3,7 @@ import os
 import pickle
 import torch
 import pytorch_lightning as pl
+import catboost
 
 from ..LSTM.lstm import LSTMModel
 
@@ -14,12 +15,14 @@ class Model():
             self.model = pickle.load(open(os.path.join('model',self.model_path), 'rb'))
         else:
             self.model = LSTMModel.load_from_checkpoint(os.path.join('model/LSTM', self.model_name+'.ckpt'))
-        ver = self.model_name.split('_')[-1]
-        self.label_encoder = pickle.load(open(os.path.join('model/utils', f"l_{ver}.sav"), 'rb'))
+        self.ver = self.model_name.split('_')[-1]
+        self.label_encoder = pickle.load(open(os.path.join('model/utils', f"l_{self.ver}.sav"), 'rb'))
 
     def predict(self, features):
-        if not isinstance(self.model, pl.LightningModule):
-            y_pred =  self.model.predict(features)
+        if not isinstance(self.model, pl.LightningModule) and not isinstance(self.model, catboost.CatBoostClassifier):
+            y_pred = self.model.predict(features)
+        elif isinstance(self.model, catboost.CatBoostClassifier):
+            y_pred = self.model.predict(features.ravel())
         else:
             values = torch.tensor(features, dtype=torch.float32).unsqueeze(0)
             y_pred = self.model(torch.permute(values, (1, 0 ,2)))
