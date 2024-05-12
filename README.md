@@ -13,7 +13,6 @@ Qualification project for master degree
 
 * CIC-IDS2017
 * CIC-IDS2018
-* CIC-DDoS2019
 
 ## Additional
 
