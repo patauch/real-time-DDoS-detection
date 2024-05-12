@@ -5,6 +5,8 @@ import traceback, sys
 import os
 import pickle
 
+from datetime import datetime
+
 from scapy.sendrecv import AsyncSniffer
 
 from ..Sniffer.model import Model
@@ -35,6 +37,7 @@ class Worker(QRunnable):
         self.normalization = pickle.load(open(os.path.join("model/utils/scaler.sav"), 'rb'))
         self.signals = WorkerSignals()
         self.sniffer = None
+        self.format = "%H:%M:%S"
 
     @pyqtSlot()
     def run(self):
@@ -71,14 +74,17 @@ class Worker(QRunnable):
     def classify(self, features):
         # preprocess
         f = features
+        lv = 0
         features = self.normalization.transform([f])
         result = self.model.predict(features)
 
         feature_string = [str(i) for i in f]
         classification = [str(result[0])]
-        
-        #if result !='BENIGN':
-        self.signals.prints.emit(*classification)
+        result_string = f"[{datetime.now().strftime(self.format)}] - {classification[0]}"
+        if result =='BENIGN':
+            lv = 1
+
+        self.signals.prints.emit(result_string, lv)
 
         return feature_string + classification   
     

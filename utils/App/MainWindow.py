@@ -24,6 +24,7 @@ class MainWindow(QMainWindow):
         self.selectedInterface = None
         self.selectedPCAP = None
         self.selectedWorkMode = None
+        self.InfoLV = 0
 
         width = 400
         height = 300
@@ -111,7 +112,10 @@ class MainWindow(QMainWindow):
         try:
             self.worker = Worker()
             self.last_startTime = datetime.now().strftime("[%y.%m.%d;%H-%M-%S]")
-
+            
+            if self.selectedWorkMode!="Offline":
+                self.InfoLV = 1
+            
             if self.selectedModel is None:
                 self.selectedModel = self.modelComboBox.itemText(self.modelComboBox.currentIndex())
                 print(f"Selected model: {self.selectedModel}")
@@ -187,6 +191,8 @@ class MainWindow(QMainWindow):
 
         self.unlock_buttons()
 
+        self.InfoLV = 0
+
         self.worker = None
         #self.worker.stop()
 
@@ -214,7 +220,7 @@ class MainWindow(QMainWindow):
             self.selectedWorkMode = "Offline"
 
     def openFileDialog(self):
-        fname = QFileDialog.getOpenFileName(self, 'Open file', './pcap', 'PCAP files (*.pcap)')
+        fname = QFileDialog.getOpenFileName(self, 'Open file', './pcap', 'PCAP files (*.pcap*)')
         self.selectedPCAP = fname[0]
 
     def error_recieved(self, *args):
@@ -227,8 +233,9 @@ class MainWindow(QMainWindow):
     def get_last_startTime(self):
         return self.last_startTime
     
-    def print_message(self, text):
-        print(text)
+    def print_message(self, text, lv=0):
+        if lv <= self.InfoLV:
+            print(text)
 
     def getModelNames(self):
         path = "model/"
