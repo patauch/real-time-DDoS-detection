@@ -25,6 +25,10 @@ class MainWindow(QMainWindow):
         self.selectedPCAP = None
         self.selectedWorkMode = None
 
+        width = 400
+        height = 300
+        self.setFixedSize(width, height)
+
         self.setWindowTitle("DDoS Detection")
 
         self.runButton = QPushButton("Run Detection")
