@@ -70,8 +70,9 @@ def test_loadModelNames(qtbot):
     model_paths = os.listdir(model_path)
     filtered_paths = []
     for path in model_paths:
-        if path.split('.')[-1] != "txt":
+        if path.split('.')[-1] == "sav":
             filtered_paths.append(path)
+    filtered_paths = filtered_paths + ['LSTM_17', 'LSTM_18']
     model_names = [path.split('.')[0] for path in filtered_paths]
 
     widget_names = [widget.modelComboBox.itemText(i) for i in range(widget.modelComboBox.count())]
@@ -109,3 +110,4 @@ def test_setInterface(qtbot):
     qtbot.wait(ms=1000)
     qtbot.mouseClick(widget.stopButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
     assert widget.selectedInterface == None
+

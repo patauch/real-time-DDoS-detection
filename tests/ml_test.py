@@ -35,3 +35,15 @@ def test_load_interface(qtbot):
     os.remove("model/test.sav")
 
     assert widget.worker.interface == interface_name
+
+def test_incorrect_interface(qtbot):
+    widget = App.MainWindow.MainWindow()
+    qtbot.addWidget(widget)
+    exp = None
+    widget.interfaceComboBox.setCurrentText("test")
+
+
+    qtbot.mouseClick(widget.runButton, PyQt6.QtCore.Qt.MouseButton.LeftButton)
+
+    
+    assert widget.selectedInterface != "test"

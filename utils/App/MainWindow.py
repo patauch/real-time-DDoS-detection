@@ -36,6 +36,9 @@ class MainWindow(QMainWindow):
 
         self.modelComboBox = QComboBox()
         self.modelComboBox.addItems(self.getModelNames())
+        self.modelComboBox.addItems(["LSTM_17", "LSTM_18"])
+        self.availableModels["LSTM_17"] = "LSTM/LSTM_17.ckpt"
+        self.availableModels["LSTM_18"] = "LSTM/LSTM_18.ckpt"
         self.modelComboBox.activated.connect(self.activatedModel)
         
         self.workMode = QCheckBox('Use offline analysis')
@@ -107,51 +110,56 @@ class MainWindow(QMainWindow):
 
             if self.selectedModel is None:
                 self.selectedModel = self.modelComboBox.itemText(self.modelComboBox.currentIndex())
-                self.worker.set_params(model_name=self.selectedModel)
-                self.worker.set_params(model_path=self.availableModels[self.selectedModel])
-                self.worker.set_model()
                 print(f"Selected model: {self.selectedModel}")
+            self.worker.set_params(model_name=self.selectedModel)
+            self.worker.set_params(model_path=self.availableModels[self.selectedModel])
+            self.worker.set_model()
 
             if self.selectedInterface is None and self.selectedWorkMode!="Offline":
                 self.selectedInterface = self.interfaceComboBox.itemText(self.interfaceComboBox.currentIndex())
-                self.worker.set_params(interface=self.selectedInterface)
+
                 print(f"Selected interface: {self.selectedInterface}")
+            self.worker.set_params(interface=self.selectedInterface)
             
             if not self.selectedPCAP and self.selectedWorkMode=="Offline":
                 print("Haven't selected PCAP")
-                pass
             else:
-                self.worker.set_params(pcap_path=self.selectedPCAP)
 
+                self.worker.set_params(pcap_path=self.selectedPCAP)
                 self.worker.set_params(mode=self.selectedWorkMode)
 
-                print("Run Button Clicked!")
-                
-                self.runButton.setEnabled(False)
-                self.stopButton.setEnabled(True)
-
-                self.modelComboBox.setEnabled(False)
-                print("Model Selection is disabled")
-
-                self.interfaceComboBox.setEnabled(False)
-                print("Interface Selection is disabled")
-
-                self.workMode.setEnabled(False)
-                self.browseButton.setEnabled(False)
-                try:
-                    print("Nothing here")
-                    """self.snifferModel = SnifferModel(self.selectedModel,
-                                                self.availableModels[self.selectedModel], self.selectedWorkMode,
-                                                self.selectedInterface, self.selectedPCAP)"""
-                except:
-                    print("Model isn't implemented yet")
-                    traceback.print_exc()
+                self.lock_buttons()
 
                 self.run_thread()
         except:
-            sys.stderr = self.old_stderr
-            sys.stdout = self.old_stdout
+            # sys.stderr = self.old_stderr
+            # sys.stdout = self.old_stdout
             traceback.print_exc()
+
+    def lock_buttons(self):
+        print("Run Button Clicked!")
+        self.runButton.setEnabled(False)
+        self.stopButton.setEnabled(True)
+
+        self.modelComboBox.setEnabled(False)
+        print("Model Selection is disabled")
+
+        self.interfaceComboBox.setEnabled(False)
+        print("Interface Selection is disabled")
+
+        self.workMode.setEnabled(False)
+        self.browseButton.setEnabled(False)
+        self.saveLogsButton.setEnabled(False)
+
+    def unlock_buttons(self):
+        self.saveLogsButton.setEnabled(True)
+        self.stopButton.setEnabled(False)
+        self.runButton.setEnabled(True)
+        self.modelComboBox.setEnabled(True)
+        self.workMode.setEnabled(True)
+        self.browseButton.setEnabled(True)
+        self.interfaceComboBox.setEnabled(True)
+        self.saveLogsButton.setEnabled(True)
 
     def stopButton_was_clicked(self):
         print("Stop Button Clicked")
@@ -173,13 +181,9 @@ class MainWindow(QMainWindow):
 
         self.selectedInterface = None
 
-        self.saveLogsButton.setEnabled(True)
-        self.stopButton.setEnabled(False)
-        self.runButton.setEnabled(True)
-        self.modelComboBox.setEnabled(True)
-        self.workMode.setEnabled(True)
-        self.browseButton.setEnabled(True)
-        self.interfaceComboBox.setEnabled(True)
+        self.unlock_buttons()
+
+        self.worker = None
         #self.worker.stop()
 
     def saveLogsButton_was_clicked(self):
@@ -205,11 +209,9 @@ class MainWindow(QMainWindow):
             self.workModeLayout.setCurrentIndex(1)
             self.selectedWorkMode = "Offline"
 
-
     def openFileDialog(self):
         fname = QFileDialog.getOpenFileName(self, 'Open file', './pcap', 'PCAP files (*.pcap)')
         self.selectedPCAP = fname[0]
-
 
     def error_recieved(self, *args):
         try:
@@ -230,7 +232,7 @@ class MainWindow(QMainWindow):
         filtered_model_names = {}
         for path in model_paths:
             p = path.split('.')
-            if p[-1] != "txt":
+            if p[-1] == "sav":
                 filtered_model_names[p[0]]=path
         self.availableModels = copy(filtered_model_names)
         return filtered_model_names.keys()

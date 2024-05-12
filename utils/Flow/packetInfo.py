@@ -16,7 +16,8 @@ flags = {
 }
 
 class PacketInfo():
-    def __init__(self) -> None:
+    def __init__(self, p) -> None:
+        self.p = p
         self.src = ""
         self.dest = ""
         self.src_port = 0
