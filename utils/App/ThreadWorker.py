@@ -19,7 +19,7 @@ FlowTimeout = 600
 class WorkerSignals(QObject):
     finished = pyqtSignal()
     error = pyqtSignal(tuple)
-    prints = pyqtSignal(str)
+    prints = pyqtSignal(list)
 
 
 class Worker(QRunnable):
@@ -34,7 +34,7 @@ class Worker(QRunnable):
         self.interface = None
         self.pcap_path = None
         self.current_flows = {}
-        self.normalization = pickle.load(open(os.path.join("model/utils/scaler.sav"), 'rb'))
+        self.normalization = None
         self.signals = WorkerSignals()
         self.sniffer = None
         self.format = "%H:%M:%S"
@@ -47,6 +47,13 @@ class Worker(QRunnable):
             else:
                 self.sniffer  = AsyncSniffer(offline=self.pcap_path, prn=self.newPacket)
             self.sniffer.start()
+            while True:
+                if self.is_stopped:
+                    break
+                if not self.sniffer.running:
+                    self.signals.finished.emit()
+                    time.sleep(1)
+                    break
         except:
             traceback.print_exc()
             print(sys.exc_info()[:2])
@@ -55,16 +62,20 @@ class Worker(QRunnable):
             self.signals.error.emit((exctype, value, traceback.format_exc()))
             
     def stop(self):
-        
-        self.is_stopped = True
-        self.sniffer.stop()
         try:
-            for flow in self.current_flows.values():
-                self.classify(flow.terminated())
+            self.is_stopped = True
+            self.sniffer.stop()
+            try:
+                for flow in self.current_flows.values():
+                    self.classify(flow.terminated())
+            except Exception as e:
+                exctype, value = sys.exc_info()[:2]
+                self.signals.error.emit((exctype, value, traceback.format_exc()))
+            self.signals.prints.emit(['Stop Sniffer', 0])
+            self.signals.finished.emit()
         except Exception as e:
-            print(e)
-        self.signals.prints.emit('Stop Sniffer')
-        self.signals.finished.emit()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
         
     
     def test(self, p):
@@ -73,19 +84,23 @@ class Worker(QRunnable):
 
     def classify(self, features):
         # preprocess
-        f = features
-        lv = 0
-        features = self.normalization.transform([f])
-        result = self.model.predict(features)
+        try:
+            f = features
+            lv = 0
+            features = self.normalization.transform([f])
+            result = self.model.predict(features)
 
-        feature_string = [str(i) for i in f]
-        classification = [str(result[0])]
-        result_string = f"[{datetime.now().strftime(self.format)}] - {classification[0]}"
-        if result =='BENIGN':
-            lv = 1
+            feature_string = [str(i) for i in f]
+            classification = [str(result[0])]
+            result_string = f"[{datetime.now().strftime(self.format)}] - {classification[0]}"
+            if result in ['BENIGN', 'Benign']:
+                lv = 1
 
-        self.signals.prints.emit(result_string, lv)
-
+            self.signals.prints.emit([result_string, lv])
+        except Exception as e:
+            print(result)
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
         return feature_string + classification   
     
     def newPacket(self, p):
@@ -170,5 +185,12 @@ class Worker(QRunnable):
 
     def set_model(self):
         self.model = Model(model_name=self.model_name, model_path=self.model_path)
+        self.set_normalization()
+    
+    def set_normalization(self):
+        v = self.model.ver
+        sc_path = f"model/utils/s_{v}.sav"
+        self.normalization = pickle.load(open(os.path.join(sc_path), 'rb'))
+        print(f"s_{v} was loaded")
 
     
